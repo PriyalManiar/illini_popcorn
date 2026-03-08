@@ -2,6 +2,8 @@
 
 **Illini Popcorn** is a data-driven crop management system designed to optimize irrigation schedules using real-time weather data, soil moisture tracking, and predictive modeling. This project integrates atmospheric forecasts with plant-specific metrics to ensure efficient water usage and optimal growth for popcorn crops.
 
+**Slides link**:https://www.canva.com/design/DAHDUa_mb_k/ZtJyqwhUFieBbm6MgpgB7g/edit
+
 ## 🚀 Key Features
 
 - **Automated Irrigation Modeling:** Execute core agricultural logic via `run_irrigation_model.py` to calculate precise watering needs.
