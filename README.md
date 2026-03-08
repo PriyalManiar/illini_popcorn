@@ -15,7 +15,9 @@
 - **Baseline Calibration:** Utilizes a `trained_baseline.csv` to compare current field data against historical performance standards.
     
 - **Visual Prototyping:** Includes an interactive interface (`plantfit_prototype.html`) for monitoring system status and plant health.
-    
+
+- **Data Pipeline:** An NSFI-driven pipeline using satellite and sensor data to trigger real-time plant stress alerts.
+![WhatsApp Image 2026-03-08 at 11 30 52](https://github.com/user-attachments/assets/e42a88eb-29e7-48b0-a4cf-febf000625bc)
 
 ---
 
