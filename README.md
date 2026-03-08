@@ -63,7 +63,9 @@
     ```
     pip install -r requirements.txt
     ```
-    
+
+3. **External API**
+    API key was originally stored in the .env file but have also include it in the api_key file
 
 ---
 
