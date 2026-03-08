@@ -19,7 +19,7 @@ CSV_PATH = Path(__file__).resolve().parent / "bondville_management_zones.csv"
 OUTPUT_PNG = Path(__file__).resolve().parent / "bondville_management_zones_map.png"
 OUTPUT_HTML = Path(__file__).resolve().parent / "bondville_management_zones_map.html"
 
-# Agricultural color scheme
+# define color scheme
 ZONE_COLORS = {
     "Low Yield Zone": "#D73027",
     "Medium Yield Zone": "#FEE08B",
@@ -29,7 +29,7 @@ ZONE_COLORS = {
 # Zone order for encoding (0=Low, 1=Medium, 2=High) and NaN for no data
 ZONE_ORDER = ["Low Yield Zone", "Medium Yield Zone", "High Yield Zone"]
 
-# Grid resolution (number of cells in lat and lon)
+# Grid resolution for lat and lon
 GRID_LAT = 120
 GRID_LON = 180
 
@@ -81,7 +81,6 @@ def build_zone_grid(path: Path, lat_edges: np.ndarray, lon_edges: np.ndarray) ->
 def main():
     print("Getting extent...")
     lat_min, lat_max, lon_min, lon_max = get_extent(CSV_PATH)
-    # Slight padding
     lat_min -= 0.002
     lat_max += 0.002
     lon_min -= 0.002
@@ -94,13 +93,12 @@ def main():
     print("Building rectangular zone grid (streaming CSV)...")
     Z = build_zone_grid(CSV_PATH, lat_edges, lon_edges)
 
-    # Mask no-data for plotting (use transparent or light gray)
     Z_masked = np.ma.masked_invalid(Z)
 
     fig, ax = plt.subplots(figsize=(14, 10), facecolor="#f8f9fa")
     ax.set_facecolor("#f8f9fa")
 
-    # Discrete colormap: 0=Low, 1=Medium, 2=High
+    # colormap: 0=Low, 1=Medium, 2=High
     from matplotlib.colors import ListedColormap, BoundaryNorm
     cmap = ListedColormap([ZONE_COLORS[z] for z in ZONE_ORDER])
     norm = BoundaryNorm(np.arange(-0.5, 3.5, 1), cmap.N)
@@ -131,7 +129,6 @@ def main():
     plt.close()
     print(f"Saved: {OUTPUT_PNG}")
 
-    # Optional: interactive HTML with folium (image overlay of the rectangular zones)
     try:
         import folium
         try:
@@ -151,7 +148,6 @@ def main():
             zoom_start=9,
             tiles="CartoDB positron",
         )
-        # Bounds: [[south, west], [north, east]]; use file path (folium embeds from file)
         ImageOverlay(
             str(overlay_png),
             bounds=[[lat_min, lon_min], [lat_max, lon_max]],

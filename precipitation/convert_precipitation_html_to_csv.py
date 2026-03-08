@@ -8,7 +8,6 @@ import re
 import csv
 from pathlib import Path
 
-# Column names matching ICN Monthly Summary layout (DAY + 23 data columns)
 DATA_COLUMNS = [
     "day",
     "max_wind_speed_mph",
@@ -51,7 +50,6 @@ def parse_month_year(lines: list[str]) -> tuple[str, str]:
     """Find line like 'July 2025' and return (month, year)."""
     for line in lines:
         line = line.strip()
-        # Match "July 2025", "August 2025", "September 2025" (with possible leading spaces)
         m = re.match(r"^(\w+)\s+(\d{4})\s*$", line)
         if m and m.group(1) in (
             "January", "February", "March", "April", "May", "June",
@@ -77,7 +75,6 @@ def parse_one_file(html_path: Path) -> list[dict]:
     if header_idx is None:
         raise ValueError(f"Could not find DAY header in {html_path}")
 
-    # Data starts after the next line that is all underscores
     start_idx = header_idx + 1
     for i in range(header_idx + 1, len(lines)):
         if re.match(r"^_+$", lines[i].strip().replace(" ", "")):
@@ -89,7 +86,6 @@ def parse_one_file(html_path: Path) -> list[dict]:
         line = lines[i]
         if not line.strip():
             continue
-        # Stop at KEY/footer only (keep TOT/AVG/MAX/MIN after second separator)
         if line.strip().startswith("KEY:") or line.strip().startswith("**"):
             break
 
@@ -98,7 +94,6 @@ def parse_one_file(html_path: Path) -> list[dict]:
             continue
 
         first = parts[0].strip()
-        # record_type: daily (day 1-31), or TOT, AVG, MAX, MIN
         if first.isdigit():
             record_type = "daily"
             day_val = first
@@ -108,7 +103,6 @@ def parse_one_file(html_path: Path) -> list[dict]:
         else:
             continue
 
-        # Build row: month, year, record_type, day (for daily rows), then 23 data columns
         row = {
             "source_file": html_path.name,
             "month": month,
@@ -117,9 +111,8 @@ def parse_one_file(html_path: Path) -> list[dict]:
             "day": day_val if record_type == "daily" else "",
         }
 
-        # Pad to expected number of data columns (23 after day)
         values = [p.strip() for p in parts[1:]]
-        for j, col in enumerate(DATA_COLUMNS[1:], start=0):  # skip "day"
+        for j, col in enumerate(DATA_COLUMNS[1:], start=0):  
             if j < len(values) and values[j]:
                 try:
                     row[col] = float(values[j])
@@ -135,10 +128,8 @@ def parse_one_file(html_path: Path) -> list[dict]:
 
 def main():
     script_dir = Path(__file__).resolve().parent
-    # All HTML files in the precipitation folder (including .asp.html)
     html_files = sorted(script_dir.glob("*.html")) + sorted(script_dir.glob("*.asp.html"))
     html_files = [f for f in html_files if f.name.endswith((".html", ".asp.html"))]
-    # Remove duplicates (in case .html and .asp.html both match)
     seen = set()
     unique_files = []
     for f in html_files:
@@ -162,7 +153,6 @@ def main():
             print(f"  Error: {e}")
             raise
 
-    # Keep only daily rows (drop TOT / AVG / MAX / MIN summary lines)
     all_rows = [r for r in all_rows if r.get("record_type") == "daily"]
 
     out_path = script_dir / "precipitation_consolidated.csv"

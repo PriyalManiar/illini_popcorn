@@ -12,7 +12,6 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-# Load .env from project root so OPENET_API_KEY can be set there (no extra deps)
 def _load_dotenv(root: Path) -> None:
     env_file = root / ".env"
     if not env_file.exists():
@@ -29,7 +28,6 @@ def _load_dotenv(root: Path) -> None:
     except OSError:
         pass
 
-# Use certifi's CA bundle if installed (fixes SSL errors on some macOS Python installs)
 try:
     import certifi
     _SSL_CTX = ssl.create_default_context(cafile=certifi.where())
@@ -41,7 +39,6 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
-# Paths relative to project root
 ROOT = Path(__file__).resolve().parent
 _load_dotenv(ROOT)
 
@@ -54,27 +51,22 @@ FILE_S2 = SAP_DIR / "sap_flow_sensor2.csv"
 FILE_WEATHER = WEATHER_DIR / "bondville_2025_jday182_273.csv"
 FILE_PRECIP = PRECIP_DIR / "precipitation_consolidated.csv"
 
-# 48h forecast: Bondville, IL — Open-Meteo (no API key). Set False to use mock only.
-# If you see SSL certificate errors: run  pip install certifi  (script will use it automatically).
 FORECAST_LAT = 40.05
 FORECAST_LON = -88.37
 USE_API_FORECAST = True
 
-# OpenET: evapotranspiration for irrigation amount. Loaded from .env (edit .env and set OPENET_API_KEY).
+# OpenET: evapotranspiration for irrigation amount.
 OPENET_API_KEY = os.environ.get("OPENET_API_KEY")
 OPENET_BASE = "https://openet-api.org"
-# Same field location as forecast (Bondville, IL). geometry = [lon, lat] for OpenET.
-ET_LOOKBACK_DAYS = 7  # days of ET - precip for deficit (how much to irrigate)
+ET_LOOKBACK_DAYS = 7  # days of ET 
 
-# Zone factors for irrigation depth (from zone management: Low / Medium / High yield).
-# Base = field-level deficit; per-zone scaling so higher-yield zones get slightly more.
 ZONE_IRRIGATION_FACTORS = {
     "Low Yield Zone": 0.85,
     "Medium Yield Zone": 1.0,
     "High Yield Zone": 1.15,
 }
 
-# Sensor allocation by zone: share of sensors to deploy in each zone (same zones as zone management).
+# Sensor allocation by zone: share of sensors to deploy in each zone 
 # High yield = 50%, Medium = 30%, Low = 20%.
 SENSOR_ALLOCATION = {
     "High Yield Zone": 0.50,
@@ -124,7 +116,6 @@ def fetch_openet_et(
             out = json.load(resp)
     except Exception as e:
         raise RuntimeError(f"OpenET API failed: {e}") from e
-    # Parse response: may be a list, or {"data": [...]} / {"values": [...]}
     pairs: list[tuple[str, float]] = []
     if isinstance(out, list):
         for row in out:
@@ -150,7 +141,6 @@ def fetch_openet_et(
             elif isinstance(row, (list, tuple)) and len(row) >= 2:
                 pairs.append((str(row[0])[:10], float(row[1])))
     if not pairs and isinstance(out, dict):
-        # Some APIs return { "2020-01-01": 1.2, ... }
         for k, v in out.items():
             if k not in ("data", "results", "values") and isinstance(v, (int, float)):
                 pairs.append((str(k)[:10], float(v)))
@@ -195,7 +185,6 @@ def fetch_forecast_48h_api(lat: float = FORECAST_LAT, lon: float = FORECAST_LON)
     Fetch next 48 hours hourly forecast from Open-Meteo (no API key).
     Returns 15-min rows for Brain 2. On SSL errors (e.g. some macOS), script falls back to mock.
     """
-    # shortwave_radiation_2m not available in hourly on this endpoint; use 0 for dw_solar
     hourly = "temperature_2m,relative_humidity_2m,windspeed_10m,precipitation"
     params = {
         "latitude": lat,
@@ -216,11 +205,11 @@ def fetch_forecast_48h_api(lat: float = FORECAST_LAT, lon: float = FORECAST_LON)
         raise RuntimeError("No hourly data in forecast response")
     times = h["time"]
     n = len(times)
-    # Build 15-min grid: each hour → 4 rows (00, 15, 30, 45)
+    #  15-min grid: each hour → 4 rows (00, 15, 30, 45)
     realdates = []
     temp = []
     rh = []
-    windspd = []  # we'll convert km/h → m/s to match Bondville
+    windspd = []  
     dw_solar = []
     total_precip_mm = []
     for i in range(n):
@@ -229,9 +218,8 @@ def fetch_forecast_48h_api(lat: float = FORECAST_LAT, lon: float = FORECAST_LON)
             realdates.append(t.replace(minute=minute))
             temp.append(h["temperature_2m"][i])
             rh.append(h["relative_humidity_2m"][i])
-            windspd.append(h["windspeed_10m"][i] / 3.6)  # km/h → m/s
-            dw_solar.append(0.0)  # not in hourly API; model will still run
-            # spread hourly precip over 4 slots so sum per hour = hourly value
+            windspd.append(h["windspeed_10m"][i] / 3.6) 
+            dw_solar.append(0.0)  
             total_precip_mm.append(h["precipitation"][i] / 4.0)
     df = pd.DataFrame({
         "realdate": realdates,
@@ -260,7 +248,6 @@ def load_and_merge_data(s1_path, s2_path, weather_path, precip_path):
     s2 = process_sensor(s2_path, "s2_mean")
 
     sensors = pd.merge(s1, s2, left_index=True, right_index=True, how="outer")
-    # Use mean of available sensors (skipna=True so one sensor alone is ok)
     sensors["sap_flow_mean"] = sensors[["s1_mean", "s2_mean"]].mean(axis=1, skipna=True)
 
     weather = pd.read_csv(weather_path)
@@ -271,7 +258,6 @@ def load_and_merge_data(s1_path, s2_path, weather_path, precip_path):
 
     precip = pd.read_csv(precip_path)
     precip = precip[precip["record_type"] == "daily"].copy()
-    # month can be "July", "August" or int
     month = precip["month"]
     if month.dtype == object or str(month.dtype) == "string":
         month_num = month.map({"January": 1, "February": 2, "March": 3, "April": 4, "May": 5, "June": 6,
@@ -413,7 +399,6 @@ if __name__ == "__main__":
 
     df_future, scenario, expected_rain_mm, needs_irrigation = run_brain_2_forecast(forecast_df, currently_stressed)
 
-    # --- OpenET: how much water to irrigate (by zone) ---
     reference_date = pd.Timestamp(df_historical["realdate"].max())
     if OPENET_API_KEY:
         try:
@@ -447,7 +432,6 @@ if __name__ == "__main__":
     else:
         print("\nSet OPENET_API_KEY in .env (see .env.example) for irrigation amount by zone (mm).")
 
-    # Zone logic (same Low/Medium/High as zone management): how many sensors per zone
     print("\n--- ZONES: SENSOR ALLOCATION ---")
     for zone_name, pct in SENSOR_ALLOCATION.items():
         short = zone_name.replace(" Yield Zone", "")
