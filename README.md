@@ -2,7 +2,7 @@
 
 **Event:** Precision Digital Agriculture Hackathon 2026 
 **Track:** Smart Crops 
-**Theme:** 
+**Theme:** Plant Water Stress and Precision Irrigation
 
 **Team Member**
 
@@ -19,7 +19,7 @@ Yuyang Liu - yuyang19@illinois.edu, UIUC, (MSIM’27 Grad Student)
 **PlantFit** is a data-driven crop management system designed to optimize irrigation schedules using real-time weather data, plant sap flow data,time series forecasting and predictive modeling. This project integrates atmospheric forecasts with plant-specific metrics to ensure efficient water usage and optimal growth for crops.
 
 **Slides link**
-[View Canva Presentation](https://www.canva.com/design/DAHDUa_mb_k/wt2sLgOy3A5au5aAAXjsIw/view?utm_content=DAHDUa_mb_k&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h92986a0da3)
+[View Presentation](https://www.canva.com/design/DAHDUa_mb_k/wt2sLgOy3A5au5aAAXjsIw/view?utm_content=DAHDUa_mb_k&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h92986a0da3)
 
 
 ##  Key Features
@@ -32,11 +32,21 @@ Yuyang Liu - yuyang19@illinois.edu, UIUC, (MSIM’27 Grad Student)
     
 - **Baseline Calibration:** Utilizes a `trained_baseline.csv` to compare current field data against historical performance standards.
     
-- **Visual Prototyping:** Includes an interactive interface (`plantfit_prototype.html`) for monitoring system status and plant health.
+- **Visual Prototyping:** Includes an interactive interface (`plantfit_prototype.html`) for monitoring plant health.
 
- ##  Data Sources 
+## Data Sources
+
+This project integrates diverse agricultural, meteorological, and geospatial datasets for Bondville, Illinois:
+
+- **Satellite Imagery (NDVI):** Sentinel-2 Level-2A satellite imagery sourced via the Copernicus Browser, used to monitor vegetation health and density.
+- **Weather Data:** Environmental Conditions data from the [NOAA SURFRAD Network (Bondville Station)](https://gml.noaa.gov/grad/surfrad/bondvill.html).
+- **Precipitation Data:** Historical precipitation metrics from the [Illinois Water and Atmospheric Resources Monitoring (WARM) Program](https://warm.isws.illinois.edu/warm/datatype.asp).
+- **Evapotranspiration (ET) Data:** Pulled via the **OpenET API** to measure water movement from the soil and plants into the atmosphere.
+- **IoT Sensor Data (Simulated):** Represents readings from 2 sensors per plant (capturing 4 distinct data points each). To model the July–August yield window, this dataset was synthetically generated using seasonal variation patterns and time series forecasting. 
+    * *Note: While currently using modeled data for the prototype, the pipeline is designed to ingest live, real-world sensor data to drive accurate, real-time predictions in deployment.*
 
  ##  Data Pipeline
+
 
 
 
@@ -50,13 +60,13 @@ Yuyang Liu - yuyang19@illinois.edu, UIUC, (MSIM’27 Grad Student)
 
 |**File / Folder**|**Function**|
 |---|---|
-|`precipitation/`|Scripts for parsing and analyzing rainfall events.|
-|`sap/`|Modules handling Soil-Plant-Atmosphere (SAP) sensor data.|
-|`weather/`|API integrations for localized weather monitoring and forecasting.|
-|`zone management/`|Logic for subdividing and managing specific agricultural plots.|
-|`run_irrigation_model.py`|The main execution script that synthesizes data into recommendations.|
-|`trained_baseline.csv`|Pre-calculated data used to calibrate the model's predictions.|
-|`mock_48hr_forecast.csv`|Sample weather data for testing the model without live API calls.|
+|`data/`|Contains raw and processed datasets used in the project|
+|`outputs/`|Generated files - figures and trained models|
+|`prototypes/`|Web-based dashboard interface and product demo video|
+|`scripts/`| Execution python files and modules|
+|`.gitattributes`|Git configuration for path-specific attributes|
+|`gitignore`|Specifies intentionally untracked files to ignore|
+|`README.md`|Project overview and documents|
 |`requirements.txt`|List of Python dependencies required for the system.|
 
 ---
@@ -105,7 +115,7 @@ To generate irrigation recommendations based on current forecasts and crop basel
 Bash
 
 ```
-python run_irrigation_model.py
+python irrigation_model.py
 ```
 
 ### Data Customization
@@ -115,7 +125,7 @@ python run_irrigation_model.py
 - **Model Calibration:** The `trained_baseline.csv` file serves as the ground truth for "healthy" crop behavior. Updating this allows the model to adapt to different corn hybrids.
     
 
-### Web Dashboard Prototype
+### Web-based Dashboard Prototype
 
 To view the conceptual UI for this system, open `plantfit_prototype.html` in any web browser. This dashboard provides a visual representation of soil moisture levels and plant health trends.
 
