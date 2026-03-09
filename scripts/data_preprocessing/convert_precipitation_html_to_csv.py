@@ -9,36 +9,17 @@ import csv
 from pathlib import Path
 
 DATA_COLUMNS = [
-    "day",
-    "max_wind_speed_mph",
-    "avg_wind_speed_mph",
-    "avg_wind_dir_deg",
-    "solar_rad_mj_m2",
-    "max_air_temp_f",
-    "min_air_temp_f",
-    "avg_air_temp_f",
-    "rel_hum_max_pct",
-    "rel_hum_min_pct",
-    "dew_point_f",
-    "total_precip_in",
-    "total_evap_in",
-    "soil_under_sod_4in_max_f",
-    "soil_under_sod_4in_min_f",
-    "soil_under_sod_4in_avg_f",
-    "soil_under_sod_8in_max_f",
-    "soil_under_sod_8in_min_f",
-    "soil_under_sod_8in_avg_f",
-    "soil_bare_4in_max_f",
-    "soil_bare_4in_min_f",
-    "soil_bare_4in_avg_f",
-    "soil_bare_2in_max_f",
-    "soil_bare_2in_min_f",
-    "soil_bare_2in_avg_f",
+    "day", "max_wind_speed_mph", "avg_wind_speed_mph", "avg_wind_dir_deg",
+    "solar_rad_mj_m2", "max_air_temp_f", "min_air_temp_f", "avg_air_temp_f",
+    "rel_hum_max_pct", "rel_hum_min_pct", "dew_point_f", "total_precip_in",
+    "total_evap_in", "soil_under_sod_4in_max_f", "soil_under_sod_4in_min_f",
+    "soil_under_sod_4in_avg_f", "soil_under_sod_8in_max_f", "soil_under_sod_8in_min_f",
+    "soil_under_sod_8in_avg_f", "soil_bare_4in_max_f", "soil_bare_4in_min_f",
+    "soil_bare_4in_avg_f", "soil_bare_2in_max_f", "soil_bare_2in_min_f", "soil_bare_2in_avg_f",
 ]
 
 
 def extract_pre_content(html_path: Path) -> str:
-    """Extract text from <pre> tag in HTML file."""
     text = html_path.read_text(encoding="utf-8", errors="replace")
     match = re.search(r"<pre[^>]*>(.*?)</pre>", text, re.DOTALL | re.IGNORECASE)
     if not match:
@@ -47,7 +28,6 @@ def extract_pre_content(html_path: Path) -> str:
 
 
 def parse_month_year(lines: list[str]) -> tuple[str, str]:
-    """Find line like 'July 2025' and return (month, year)."""
     for line in lines:
         line = line.strip()
         m = re.match(r"^(\w+)\s+(\d{4})\s*$", line)
@@ -60,13 +40,10 @@ def parse_month_year(lines: list[str]) -> tuple[str, str]:
 
 
 def parse_one_file(html_path: Path) -> list[dict]:
-    """Parse one HTML file and return list of row dicts with month, year, record_type, and data columns."""
     pre = extract_pre_content(html_path)
     lines = [ln.rstrip() for ln in pre.splitlines()]
-
     month, year = parse_month_year(lines)
 
-    # Find header line (starts with DAY and uses tabs)
     header_idx = None
     for i, line in enumerate(lines):
         if line.strip().startswith("DAY\t") or (line.strip().startswith("DAY") and "\t" in line):
@@ -127,9 +104,9 @@ def parse_one_file(html_path: Path) -> list[dict]:
 
 
 def main():
-    # UPDATED PATHS: Find the root directory and point to data/precipitation
+    # DYNAMIC PATH RESOLUTION: Looking 2 folders up to root, then into data/precipitation
     script_dir = Path(__file__).resolve().parent
-    precip_dir = script_dir.parent / "data" / "precipitation"
+    precip_dir = script_dir.parent.parent / "data" / "precipitation/raw_data"
     
     html_files = sorted(precip_dir.glob("*.html")) + sorted(precip_dir.glob("*.asp.html"))
     html_files = [f for f in html_files if f.name.endswith((".html", ".asp.html"))]

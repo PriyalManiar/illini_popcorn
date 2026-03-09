@@ -4,9 +4,10 @@ import pandas as pd
 from sklearn.cluster import KMeans
 import os
 import glob
+from pathlib import Path
 
-def process_tiff_zones(folder_path):
-    print(f"--- SCIENTIFIC SATELLITE ZONE DELINEATION ---")
+def process_tiff_zones(folder_path, output_path):
+    print(f"--- 🛰️ SCIENTIFIC SATELLITE ZONE DELINEATION ---")
     
     search_path = os.path.join(folder_path, "*.tif*")
     tif_files = glob.glob(search_path)
@@ -24,7 +25,6 @@ def process_tiff_zones(folder_path):
             transform = dataset.transform
             
             # FAST VECTORIZED COORDINATE EXTRACTION
-            # This generates the exact GPS coordinates for the entire image instantly
             cols, rows = np.meshgrid(np.arange(ndvi.shape[1]), np.arange(ndvi.shape[0]))
             xs, ys = rasterio.transform.xy(transform, rows, cols)
             
@@ -33,24 +33,19 @@ def process_tiff_zones(folder_path):
             lats = np.array(ys).flatten()
             ndvi_flat = ndvi.flatten()
             
-            # Filter out clouds, water, and NaN values (> 0.05 is usually healthy dirt/plants)
+            # Filter out clouds, water, and NaN values
             valid_mask = (ndvi_flat > 0.05) & (~np.isnan(ndvi_flat))
             
             valid_ndvi = ndvi_flat[valid_mask]
             valid_lons = lons[valid_mask]
             valid_lats = lats[valid_mask]
             
-            # Append to our master list. 
-            # We round to 5 decimal places (~1 meter precision) so pixels from different days snap together
             for lat, lon, val in zip(valid_lats, valid_lons, valid_ndvi):
                 all_data.append([round(lat, 5), round(lon, 5), val])
                 
     print("Calculating historical average NDVI across all 36 dates...")
     
-    # Dump everything into a giant pandas DataFrame
     df_all = pd.DataFrame(all_data, columns=['lat', 'lon', 'ndvi'])
-    
-    # Group by the exact GPS coordinates and calculate the mean NDVI over the 5 years
     df_spatial = df_all.groupby(['lat', 'lon'])['ndvi'].mean().reset_index()
     df_spatial = df_spatial.rename(columns={'ndvi': 'avg_ndvi'})
     
@@ -60,7 +55,6 @@ def process_tiff_zones(folder_path):
     kmeans = KMeans(n_clusters=3, random_state=42)
     df_spatial['cluster'] = kmeans.fit_predict(df_spatial[['avg_ndvi']])
     
-    # Sort the clusters so the highest actual NDVI average naturally becomes "High Yield"
     cluster_centers = kmeans.cluster_centers_.flatten()
     sorted_idx = np.argsort(cluster_centers)
     
@@ -71,18 +65,19 @@ def process_tiff_zones(folder_path):
     }
     df_spatial['zone'] = df_spatial['cluster'].map(mapping)
     
-    # Clean up output
     output_df = df_spatial[['lat', 'lon', 'zone']]
-    
-    output_filename = "bondville_zones.csv"
-    output_df.to_csv(output_filename, index=False)
+    output_df.to_csv(output_path, index=False)
     
     print(f"\n✅ SUCCESS! Scientific field delineation complete.")
-    print(f"Zone map saved to '{output_filename}'.")
+    print(f"Zone map saved to '{output_path}'.")
     
     print("\nZone Distribution summary:")
     print(output_df['zone'].value_counts())
 
 if __name__ == "__main__":
-    YOUR_FOLDER = os.path.join("data", "satellite_imgs") 
-    process_tiff_zones(YOUR_FOLDER)
+    # DYNAMIC PATH RESOLUTION
+    ROOT_DIR = Path(__file__).resolve().parent.parent
+    DATA_FOLDER = ROOT_DIR / "data" / "satellite_imgs"
+    OUTPUT_FILE = ROOT_DIR / "outputs" / "bondville_zones.csv"
+    
+    process_tiff_zones(DATA_FOLDER, OUTPUT_FILE)

@@ -38,18 +38,21 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
-ROOT = Path(__file__).resolve().parent
-_load_dotenv(ROOT)
+# DYNAMIC PATH RESOLUTION
+SCRIPTS_DIR = Path(__file__).resolve().parent
+ROOT_DIR = SCRIPTS_DIR.parent
+OUTPUTS_DIR = ROOT_DIR / "outputs"
+DATA_DIR = ROOT_DIR / "data"
 
-# UPDATED PATHS TO MATCH NEW FOLDER STRUCTURE
-DATA_DIR = ROOT / "data"
+_load_dotenv(ROOT_DIR)
+
 SAP_DIR = DATA_DIR / "sap"
 WEATHER_DIR = DATA_DIR / "weather"
 PRECIP_DIR = DATA_DIR / "precipitation"
 
 FILE_S1 = SAP_DIR / "sap_flow_sensor1.csv"
 FILE_S2 = SAP_DIR / "sap_flow_sensor2.csv"
-FILE_WEATHER = WEATHER_DIR / "weather_data.csv" # Updated filename
+FILE_WEATHER = WEATHER_DIR / "weather_data.csv"
 FILE_PRECIP = PRECIP_DIR / "precipitation_consolidated.csv"
 
 FORECAST_LAT = 40.05
@@ -289,7 +292,9 @@ def train_stage_1(df_master):
     calibration_data["time_of_day"] = calibration_data["realdate"].dt.time
     baseline = calibration_data.groupby("time_of_day")["sap_flow_mean"].quantile(0.25).reset_index()
     baseline = baseline.rename(columns={"sap_flow_mean": "baseline_25th_pct"})
-    baseline.to_csv(ROOT / "trained_baseline.csv", index=False)
+    
+    # Save to outputs directory
+    baseline.to_csv(OUTPUTS_DIR / "trained_baseline.csv", index=False)
 
     df_ml = df_master.copy()
     df_ml["hour"] = df_ml["realdate"].dt.hour
@@ -302,13 +307,14 @@ def train_stage_1(df_master):
     model = RandomForestRegressor(n_estimators=100, random_state=42)
     model.fit(df_ml[features], df_ml[target])
 
-    joblib.dump(model, ROOT / "historical_model.pkl")
+    # Save directly to the scripts directory
+    joblib.dump(model, SCRIPTS_DIR / "historical_model.pkl")
     print("Model trained on 2025 data.")
     return baseline
 
 
 def run_brain_1_monitor(df_current, baseline):
-    print("\n--- BRAIN 1: LIVE MONITORING ---")
+    print("\n--- LIVE MONITORING ---")
     df = df_current.copy()
 
     df["4hr_trailing_avg"] = df["sap_flow_mean"].rolling(window=16, min_periods=1).mean()
@@ -331,8 +337,11 @@ def run_brain_1_monitor(df_current, baseline):
 def run_brain_2_forecast(forecast_df, current_is_stressed):
     print("\n--- FORECAST (NEXT 48 HRS) ---")
 
-    model = joblib.load(ROOT / "historical_model.pkl")
-    baseline = pd.read_csv(ROOT / "trained_baseline.csv")
+    # Load from scripts directory
+    model = joblib.load(SCRIPTS_DIR / "historical_model.pkl")
+    
+    # Load from outputs directory
+    baseline = pd.read_csv(OUTPUTS_DIR / "trained_baseline.csv")
     baseline["time_of_day"] = pd.to_datetime(baseline["time_of_day"], format="mixed").dt.time
 
     df = forecast_df.copy()
@@ -375,7 +384,9 @@ def create_mock_forecast(df_master):
     forecast = df_master.tail(192).copy()
     forecast["temp"] = forecast["temp"] + 5.0
     forecast["total_precip_mm"] = 0.0
-    forecast.to_csv(ROOT / "mock_48hr_forecast.csv", index=False)
+    
+    # Save to outputs directory
+    forecast.to_csv(OUTPUTS_DIR / "mock_48hr_forecast.csv", index=False)
     return forecast
 
 
