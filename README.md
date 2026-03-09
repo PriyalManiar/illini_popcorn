@@ -6,7 +6,7 @@
 
 **Slides link**
 
-https://www.canva.com/design/DAHDUa_mb_k/ZtJyqwhUFieBbm6MgpgB7g/edit
+https://www.canva.com/design/DAHDUa_mb_k/wt2sLgOy3A5au5aAAXjsIw/view?utm_content=DAHDUa_mb_k&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h92986a0da3
 
 **Team Member**
 
@@ -18,7 +18,7 @@ Prisha Singhania - pds4@illinois.edu, UIUC, (MSIM’26 Grad Student)
 
 Yuyang Liu - yuyang19@illinois.edu, UIUC, (MSIM’27 Grad Student)
 
-## 🚀 Key Features
+##  Key Features
 
 - **Automated Irrigation Modeling:** Execute core agricultural logic via `run_irrigation_model.py` to calculate precise watering needs.
     
@@ -35,7 +35,7 @@ Yuyang Liu - yuyang19@illinois.edu, UIUC, (MSIM’27 Grad Student)
 
 ---
 
-## 📂 Repository Structure
+##  Repository Structure
 
 |**File / Folder**|**Function**|
 |---|---|
@@ -50,7 +50,7 @@ Yuyang Liu - yuyang19@illinois.edu, UIUC, (MSIM’27 Grad Student)
 
 ---
 
-## 🛠️ Installation & Setup
+##  Installation & Setup
 
 ### Prerequisites
 
@@ -83,7 +83,7 @@ Yuyang Liu - yuyang19@illinois.edu, UIUC, (MSIM’27 Grad Student)
 
 ---
 
-## 📈 Usage
+##  Usage
 
 The system is designed to be modular, allowing for both automated modeling and manual data adjustment.
 
