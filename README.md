@@ -1,8 +1,8 @@
 # Illini Popcorn: Precision Irrigation Management
 
-**Illini Popcorn** is a data-driven crop management system designed to optimize irrigation schedules using real-time weather data, soil moisture tracking, and predictive modeling. This project integrates atmospheric forecasts with plant-specific metrics to ensure efficient water usage and optimal growth for popcorn crops.
+**Illini Popcorn** is a data-driven crop management system designed to optimize irrigation schedules using real-time weather data, plant sap flow data,time series forecasting and predictive modeling. This project integrates atmospheric forecasts with plant-specific metrics to ensure efficient water usage and optimal growth for crops.
 
-**Problem Statement:** crops are thirsty and we often know too late. This causes great loss in productivity. We integrate a minimum invasive crop sap flow sensor to see the “pulse of the crop” and combine it with environmental data and forecasts to provide irrigation advice.
+**Problem Statement:** Crops are thirsty and we often know too late. This causes great loss in productivity. We integrate a minimum invasive crop sap flow sensor to see the “pulse of the crop” and combine it with environmental data and forecasts to provide irrigation advice.
 
 **Slides link**
 
