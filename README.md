@@ -1,4 +1,4 @@
-# Illini Popcorn: Precision Irrigation Management
+# Illini Popcorn: PlantFit
 
 **Event:** Precision Digital Agriculture Hackathon 2026 
 **Track:** Smart Crops 
