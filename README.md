@@ -1,12 +1,8 @@
 # Illini Popcorn: Precision Irrigation Management
 
-**Illini Popcorn** is a data-driven crop management system designed to optimize irrigation schedules using real-time weather data, plant sap flow data,time series forecasting and predictive modeling. This project integrates atmospheric forecasts with plant-specific metrics to ensure efficient water usage and optimal growth for crops.
-
-**Problem Statement:** Crops are thirsty and we often know too late. This causes great loss in productivity. We integrate a minimum invasive crop sap flow sensor to see the “pulse of the crop” and combine it with environmental data and forecasts to provide irrigation advice.
-
-**Slides link**
-
-https://www.canva.com/design/DAHDUa_mb_k/wt2sLgOy3A5au5aAAXjsIw/view?utm_content=DAHDUa_mb_k&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h92986a0da3
+**Event:** Precision Digital Agriculture Hackathon 2026 
+**Track:** Smart Crops 
+**Theme:** 
 
 **Team Member**
 
@@ -17,6 +13,14 @@ Priyal Maniar - priyalm2@illinois.edu, UIUC, (MSIM’26 Grad Student)
 Prisha Singhania - pds4@illinois.edu, UIUC, (MSIM’26 Grad Student)
 
 Yuyang Liu - yuyang19@illinois.edu, UIUC, (MSIM’27 Grad Student)
+
+**Problem Statement:** Crops are thirsty and we often know too late. This causes great loss in productivity. We integrate a minimum invasive crop sap flow sensor to see the “pulse of the crop” and combine it with environmental data and forecasts to provide irrigation advice.
+
+**PlantFit** is a data-driven crop management system designed to optimize irrigation schedules using real-time weather data, plant sap flow data,time series forecasting and predictive modeling. This project integrates atmospheric forecasts with plant-specific metrics to ensure efficient water usage and optimal growth for crops.
+
+**Slides link**
+[View Canva Presentation](https://www.canva.com/design/DAHDUa_mb_k/wt2sLgOy3A5au5aAAXjsIw/view?utm_content=DAHDUa_mb_k&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h92986a0da3)
+
 
 ##  Key Features
 
@@ -30,10 +34,17 @@ Yuyang Liu - yuyang19@illinois.edu, UIUC, (MSIM’27 Grad Student)
     
 - **Visual Prototyping:** Includes an interactive interface (`plantfit_prototype.html`) for monitoring system status and plant health.
 
+ ##  Data Sources 
+
+ ##  Data Pipeline
+
+
+
 - **Data Pipeline:** An NSFI-driven pipeline using satellite and sensor data to trigger real-time plant stress alerts.
 ![WhatsApp Image 2026-03-08 at 11 30 52](https://github.com/user-attachments/assets/e42a88eb-29e7-48b0-a4cf-febf000625bc)
 
 ---
+
 
 ##  Repository Structure
 
