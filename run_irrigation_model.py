@@ -1,9 +1,8 @@
 """
 Single script: load sap + weather + precip, train 7-day baseline + RF model,
-run live monitor (Brain 1) and forecast recommendations (Brain 2).
+run live monitor and forecast recommendations.
 Integrates OpenET for ET-based irrigation amounts by zone (Low/Medium/High yield).
-Run from project root: python3 run_irrigation_model.py
-OpenET key: set OPENET_API_KEY in .env (copy .env.example to .env and edit).
+OpenET key: set OPENET_API_KEY in .env.
 """
 import json
 import os
@@ -42,13 +41,15 @@ from sklearn.ensemble import RandomForestRegressor
 ROOT = Path(__file__).resolve().parent
 _load_dotenv(ROOT)
 
-SAP_DIR = ROOT / "sap"
-WEATHER_DIR = ROOT / "weather"
-PRECIP_DIR = ROOT / "precipitation"
+# UPDATED PATHS TO MATCH NEW FOLDER STRUCTURE
+DATA_DIR = ROOT / "data"
+SAP_DIR = DATA_DIR / "sap"
+WEATHER_DIR = DATA_DIR / "weather"
+PRECIP_DIR = DATA_DIR / "precipitation"
 
 FILE_S1 = SAP_DIR / "sap_flow_sensor1.csv"
 FILE_S2 = SAP_DIR / "sap_flow_sensor2.csv"
-FILE_WEATHER = WEATHER_DIR / "bondville_2025_jday182_273.csv"
+FILE_WEATHER = WEATHER_DIR / "weather_data.csv" # Updated filename
 FILE_PRECIP = PRECIP_DIR / "precipitation_consolidated.csv"
 
 FORECAST_LAT = 40.05
@@ -183,7 +184,7 @@ def compute_irrigation_by_zone(
 def fetch_forecast_48h_api(lat: float = FORECAST_LAT, lon: float = FORECAST_LON) -> pd.DataFrame:
     """
     Fetch next 48 hours hourly forecast from Open-Meteo (no API key).
-    Returns 15-min rows for Brain 2. On SSL errors (e.g. some macOS), script falls back to mock.
+    Returns 15-min rows for forecasting. On SSL errors (e.g. some macOS), script falls back to mock.
     """
     hourly = "temperature_2m,relative_humidity_2m,windspeed_10m,precipitation"
     params = {
@@ -301,7 +302,7 @@ def train_stage_1(df_master):
     model = RandomForestRegressor(n_estimators=100, random_state=42)
     model.fit(df_ml[features], df_ml[target])
 
-    joblib.dump(model, ROOT / "brain2_historical_model.pkl")
+    joblib.dump(model, ROOT / "historical_model.pkl")
     print("Model trained on 2025 data.")
     return baseline
 
@@ -328,9 +329,9 @@ def run_brain_1_monitor(df_current, baseline):
 
 
 def run_brain_2_forecast(forecast_df, current_is_stressed):
-    print("\n--- BRAIN 2: FORECAST (NEXT 48 HRS) ---")
+    print("\n--- FORECAST (NEXT 48 HRS) ---")
 
-    model = joblib.load(ROOT / "brain2_historical_model.pkl")
+    model = joblib.load(ROOT / "historical_model.pkl")
     baseline = pd.read_csv(ROOT / "trained_baseline.csv")
     baseline["time_of_day"] = pd.to_datetime(baseline["time_of_day"], format="mixed").dt.time
 
