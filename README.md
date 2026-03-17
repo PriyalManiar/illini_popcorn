@@ -1,4 +1,4 @@
-# Illini Popcorn: PlantFit
+# PlantFit : Real-Time and Forecasting Precision Irrigation
 
 **Event:** Precision Digital Agriculture Hackathon 2026 
 
@@ -6,7 +6,7 @@
 
 **Theme:** Plant Water Stress and Precision Irrigation
 
-**Team Member**
+**Team Members**
 
 Ximin Pian - xpiao2@illinois.edu, UIUC, (PhD candidate in CEE)
 
@@ -48,7 +48,7 @@ This project integrates diverse agricultural, meteorological, and geospatial dat
 - **Weather Data:** Environmental Conditions data from the [NOAA SURFRAD Network (Bondville Station)](https://gml.noaa.gov/grad/surfrad/bondvill.html).
 - **Precipitation Data:** Historical precipitation metrics from the [Illinois Water and Atmospheric Resources Monitoring (WARM) Program](https://warm.isws.illinois.edu/warm/datatype.asp).
 - **Evapotranspiration (ET) Data:** Pulled via the **OpenET API** to measure water movement from the soil and plants into the atmosphere.
-- **IoT Sensor Data (Simulated):** Represents readings from 2 sensors per plant (capturing 4 distinct data points each). To model the July–August yield window, this dataset was synthetically generated using seasonal variation patterns and time series forecasting. 
+- **Sensor Data (Simulated):** Represents readings from 2 sensors per plant (capturing 4 distinct data points each). To model the July–August yield window, this dataset was synthetically generated using seasonal variation patterns and time series forecasting. 
     * *Note: While currently using modeled data for the prototype, the pipeline is designed to ingest live, real-world sensor data to drive accurate, real-time predictions in deployment.*
 
  ##  Data Pipeline
@@ -175,7 +175,3 @@ python scripts/irrigation_model.py
 To view the conceptual UI for this system, open `plantfit_prototype.html` in any web browser. This dashboard provides a visual representation of soil moisture levels and plant health trends.
 
 ---
-
-## 📄 License
-
-This project is licensed under the **MIT License**
