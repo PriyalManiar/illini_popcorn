@@ -1,0 +1,22 @@
+.git
+.gitignore
+.gitattributes
+.DS_Store
+**/.DS_Store
+
+# Local docs not needed in image
+documents/
+
+# Keep images small; outputs are generated at runtime
+outputs/
+
+# Local caches
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+
+# Large installers not needed
+git-lfs-*/
+git-lfs.tar.gz
+git-lfs.zip
