@@ -71,8 +71,9 @@ This project integrates diverse agricultural, meteorological, and geospatial dat
 - **Forecast-based irrigation recommendations**
 - **Environmental stress explanations** (rainfall + ET + forecast-driven demand context)
 - **Zone-level crop monitoring** (High/Medium/Low yield zones and sensor allocation)
-![<img width="392" height="528" alt="Screenshot 2026-03-17 at 11 28 35 AM" src="https://github.com/user-attachments/assets/5dc8f7dc-e6e9-4291-881c-f1cc84744c4a" />
-]
+<p align="center">
+  <img width="392" height="528" alt="Screenshot" src="https://github.com/user-attachments/assets/5dc8f7dc-e6e9-4291-881c-f1cc84744c4a">
+</p>
 
 ---
 
