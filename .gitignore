@@ -9,3 +9,8 @@ git-lfs.zip
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Generated artifacts
+outputs/historical_model.pkl
+outputs/trained_baseline.csv
+outputs/mock_48hr_forecast.csv
