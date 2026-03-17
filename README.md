@@ -36,7 +36,9 @@ Yuyang Liu - yuyang19@illinois.edu, UIUC, (MSIM’27 Grad Student)
     
 - **Visual Prototyping:** Includes an interactive interface (`plantfit_prototype.html`) for monitoring plant health and making insights easy for farmers to understand—encouraging adoption and improving awareness of crop health.
 
-<img src="assets/ui-design.png" alt="PlantFit UI design" width="420" />
+<p align="center">
+  <img src="assets/ui-design.png" alt="PlantFit UI design" width="420" />
+</p>
 
 ## Data Sources
 
