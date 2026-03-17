@@ -1,4 +1,5 @@
 /.DS_Store
+**/.DS_Store
 # Git LFS installer
 git-lfs*/
 git-lfs.tar.gz

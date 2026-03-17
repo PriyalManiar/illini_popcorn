@@ -239,9 +239,23 @@ def fetch_forecast_48h_api(lat: float = FORECAST_LAT, lon: float = FORECAST_LON)
 def load_and_merge_data(s1_path, s2_path, weather_path, precip_path):
     print("--- PREPROCESSING DATA ---")
 
+    def _ensure_not_lfs_pointer(path: Path) -> None:
+        try:
+            with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                first = f.readline().strip()
+        except OSError as e:
+            raise FileNotFoundError(f"Missing required file: {path}") from e
+        if first == "version https://git-lfs.github.com/spec/v1":
+            raise RuntimeError(
+                f"{path} is a Git LFS pointer file, not the real dataset.\n"
+                f"Run `git lfs install` and `git lfs pull` (or re-clone with Git LFS) to download the data."
+            )
+
     def process_sensor(path, sensor_name):
         df = pd.read_csv(path)
-        df["realdate"] = pd.to_datetime(df["realdate"])
+        # Input dates look like: 8/8/25 0:03
+        df["realdate"] = pd.to_datetime(df["realdate"], format="%m/%d/%y %H:%M", errors="coerce")
+        df = df[df["realdate"].notna()].copy()
         if "svalue_1" in df.columns:
             df[sensor_name] = df[["svalue_1", "svalue_2", "svalue_3", "svalue_4"]].mean(axis=1)
         else:
@@ -254,12 +268,25 @@ def load_and_merge_data(s1_path, s2_path, weather_path, precip_path):
     sensors = pd.merge(s1, s2, left_index=True, right_index=True, how="outer")
     sensors["sap_flow_mean"] = sensors[["s1_mean", "s2_mean"]].mean(axis=1, skipna=True)
 
+    _ensure_not_lfs_pointer(Path(weather_path))
     weather = pd.read_csv(weather_path)
-    weather_dates = weather[["year", "month", "day", "hour", "min"]].rename(columns={"min": "minute"})
-    weather["realdate"] = pd.to_datetime(weather_dates)
-    weather = weather[["realdate", "temp", "rh", "windspd", "dw_solar"]]
+    # Support either split columns or a prebuilt datetime column
+    if {"year", "month", "day", "hour", "min"}.issubset(weather.columns):
+        weather_dates = weather[["year", "month", "day", "hour", "min"]].rename(columns={"min": "minute"})
+        weather["realdate"] = pd.to_datetime(weather_dates, errors="coerce")
+    elif "realdate" in weather.columns:
+        weather["realdate"] = pd.to_datetime(weather["realdate"], errors="coerce")
+    elif "time" in weather.columns:
+        weather["realdate"] = pd.to_datetime(weather["time"], errors="coerce")
+    else:
+        raise KeyError(
+            "weather_data.csv must contain either "
+            "['year','month','day','hour','min'] or a 'realdate'/'time' column."
+        )
+    weather = weather[["realdate", "temp", "rh", "windspd", "dw_solar"]].dropna(subset=["realdate"])
     weather = weather.set_index("realdate").resample("15min").mean()
 
+    _ensure_not_lfs_pointer(Path(precip_path))
     precip = pd.read_csv(precip_path)
     precip = precip[precip["record_type"] == "daily"].copy()
     month = precip["month"]
@@ -307,8 +334,9 @@ def train_stage_1(df_master):
     model = RandomForestRegressor(n_estimators=100, random_state=42)
     model.fit(df_ml[features], df_ml[target])
 
-    # Save directly to the scripts directory
-    joblib.dump(model, SCRIPTS_DIR / "historical_model.pkl")
+    # Save trained model to outputs directory
+    OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
+    joblib.dump(model, OUTPUTS_DIR / "historical_model.pkl")
     print("Model trained on 2025 data.")
     return baseline
 
@@ -337,8 +365,11 @@ def run_brain_1_monitor(df_current, baseline):
 def run_brain_2_forecast(forecast_df, current_is_stressed):
     print("\n--- FORECAST (NEXT 48 HRS) ---")
 
-    # Load from scripts directory
-    model = joblib.load(SCRIPTS_DIR / "historical_model.pkl")
+    # Load trained model from outputs directory (fallback to legacy scripts path)
+    model_path = OUTPUTS_DIR / "historical_model.pkl"
+    if not model_path.exists():
+        model_path = SCRIPTS_DIR / "historical_model.pkl"
+    model = joblib.load(model_path)
     
     # Load from outputs directory
     baseline = pd.read_csv(OUTPUTS_DIR / "trained_baseline.csv")
