@@ -34,7 +34,9 @@ Yuyang Liu - yuyang19@illinois.edu, UIUC, (MSIM’27 Grad Student)
     
 - **Baseline Calibration:** Utilizes a `trained_baseline.csv` to compare current field data against historical performance standards.
     
-- **Visual Prototyping:** Includes an interactive interface (`plantfit_prototype.html`) for monitoring plant health.
+- **Visual Prototyping:** Includes an interactive interface (`plantfit_prototype.html`) for monitoring plant health and making insights easy for farmers to understand—encouraging adoption and improving awareness of crop health.
+
+![PlantFit UI design]()
 
 ## Data Sources
 
@@ -49,10 +51,24 @@ This project integrates diverse agricultural, meteorological, and geospatial dat
 
  ##  Data Pipeline
 
+- **Zone delineation from satellite NDVI (Bondville, IL)**: Pulled past 5 years of Sentinel-2 NDVI imagery for Bondville and computed a 5-year moving average to classify yield zones as **High / Medium / Low**.
+- **Sensor placement strategy for 2026**: Used the yield zones to define a scalable deployment strategy (allocate **more sensors to High Yield zones** and **fewer sensors to Low Yield zones**) to optimize cost and coverage.
+- **Field-level physiological + environmental data (July–Sept 2025)**:
+  - **Plant sap flow sensor readings** (analysis used private real-world data; the repo publishes a synthetic version)
+  - **Weather/environmental drivers** (temperature, relative humidity, wind, solar)
+  - **Precipitation** (historical daily totals)
+  - **Evapotranspiration (ET)** via OpenET API to estimate baseline water demand for the field
+- **Normalized Sap Flow Index (NSFI)**: Combined sap flow with environmental water demand to produce a normalized signal used for stress inference.
+- **7-day calibration baseline**: Established a baseline (7-day window) for expected sap flow behavior by time-of-day.
+- **Stress alerting**: Computed a **4-hour rolling average** of normalized sap flow and triggered water-stress alerts when the rolling average drops below the calibrated baseline threshold.
+- **Machine learning (forecasting)**: Trained a **Random Forest regressor** on historical data to predict sap flow under forecasted environmental conditions and generate **next-48-hour stress outlooks**.
 
+**Outputs**
 
-
-- **Data Pipeline:** An NSFI-driven pipeline using satellite and sensor data to trigger real-time plant stress alerts.
+- **Real-time plant water stress alerts**
+- **Forecast-based irrigation recommendations**
+- **Environmental stress explanations** (rainfall + ET + forecast-driven demand context)
+- **Zone-level crop monitoring** (High/Medium/Low yield zones and sensor allocation)
 ![WhatsApp Image 2026-03-08 at 11 30 52](https://github.com/user-attachments/assets/e42a88eb-29e7-48b0-a4cf-febf000625bc)
 
 ---
@@ -62,14 +78,17 @@ This project integrates diverse agricultural, meteorological, and geospatial dat
 
 |**File / Folder**|**Function**|
 |---|---|
-|`data/`|Contains raw and processed datasets used in the project|
-|`outputs/`|Generated files - figures and trained models|
-|`prototypes/`|Web-based dashboard interface and product demo video|
-|`scripts/`| Execution python files and modules|
-|`.gitattributes`|Git configuration for path-specific attributes|
-|`gitignore`|Specifies intentionally untracked files to ignore|
-|`README.md`|Project overview and documents|
-|`requirements.txt`|List of Python dependencies required for the system.|
+|`data/`|Datasets used by the pipeline (weather, precipitation, sap).|
+|`data/sap/raw/`|Raw (simulated) sensor inputs (`sensor1.csv`, `sensor2.csv`) and preprocessing notebook inputs.|
+|`outputs/`|Generated artifacts (trained model, baseline, forecasts, maps).|
+|`prototype/`|Web-based dashboard prototype (`plantfit_prototype.html`) and demo video.|
+|`scripts/`|Execution scripts and preprocessing utilities.|
+|`Dockerfile`|Container image definition for consistent runs.|
+|`docker-compose.yml`|One-command Docker run with data/outputs mounted.|
+|`.gitattributes`|Git configuration (includes Git LFS patterns).|
+|`.gitignore`|Specifies intentionally untracked files to ignore.|
+|`README.md`|Project overview and usage instructions.|
+|`requirements.txt`|Python dependencies required for the system.|
 
 ---
 
@@ -80,6 +99,26 @@ This project integrates diverse agricultural, meteorological, and geospatial dat
 - Python 3.8+
     
 - Pip (Python package manager)
+
+### Docker (recommended)
+
+This repo includes a `Dockerfile` and `docker-compose.yml` so the pipeline runs consistently across machines.
+
+1. **Install Docker Desktop**
+2. **Build + run**
+
+```
+docker compose up --build
+```
+
+This will run `scripts/irrigation_model.py`. Generated artifacts are written to `outputs/` on your machine via a volume mount.
+
+#### Optional: OpenET API key
+
+```
+export OPENET_API_KEY="YOUR_KEY"
+docker compose up --build
+```
     
 
 ### Installation
@@ -117,7 +156,7 @@ To generate irrigation recommendations based on current forecasts and crop basel
 Bash
 
 ```
-python irrigation_model.py
+python scripts/irrigation_model.py
 ```
 
 ### Data Customization
