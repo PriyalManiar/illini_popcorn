@@ -22,3 +22,5 @@ outputs/mock_48hr_forecast.csv
 
 # Generated artifacts
 outputs/historical_model.pkl
+
+documents/
